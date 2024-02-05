@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 import pandas as pd
-import simplejson as json
+import gzip
 
 app = FastAPI()
 
@@ -14,13 +14,13 @@ async def root():
 try:
     df = pd.read_csv('datasets/dfgames.csv')
     df_reviews = pd.read_csv('datasets/user_reviews.csv')
-    df_items = pd.read_csv('datasets/users_item.csv')
+    # Utiliza gzip para abrir el archivo comprimido y pandas para leer el CSV
+    with gzip.open('datasets/users_item.csv.gz', 'rt', encoding='utf-8') as f:
+    # Lee el archivo CSV directamente desde el archivo comprimido
+        df_items = pd.read_csv(f)
 
 except Exception as e:
     raise HTTPException(status_code=500, detail=f"Error al cargar los datos: {str(e)}")
-
-def convert_dataframe_to_dict(df):
-    return json.loads(df.to_json(orient='split'))
 
 # Esta función devuelve la cantidad de items y el porcentaje de contenido gratuito por año según el desarrollador
 @app.get('/developer/{desarrollador}')
